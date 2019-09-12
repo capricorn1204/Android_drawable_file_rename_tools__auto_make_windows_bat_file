@@ -14,5 +14,5 @@
 
 ### 3.运行后，打开任意一个dpi文件夹验证结果，如下图所示，文件名称已被修改为配置的名称：
 
-![image](https://github.com/capricorn1204/Android_drawable_file_rename_tools__auto_make_windows_bat_file/blob/master/images/demo_result.png)
+![image](https://github.com/capricorn1204/Android_drawable_file_rename_tools__auto_make_windows_bat_file/blob/master/images/demo_result1.png)
 
