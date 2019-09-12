@@ -1,0 +1,2 @@
+# Android_drawable_file_rename_tools__auto_make_windows_bat_file
+安卓drawable文件更名工具--windows批处理更名bat文件生成
