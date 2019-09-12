@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title>安卓图片更名器</title>
+		<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>	
+		
+		<script type="text/javascript">
+			function addDpi(){
+				var dpi_name =$('#dpi_input_add').val();
+				var innerHtml = document.getElementById('dpi_names').innerHTML;
+				var i=1;
+				while(innerHtml.indexOf('dpi_name_id'+i)>=0 && i<10){
+					i++;
+				}
+				if(i>=10){
+					alert('最多添加10个文件夹名~！');
+				}else{
+					document.getElementById('dpi_names').innerHTML = 
+						innerHtml+'<input style=\'margin:5px;\' id=\'dpi_name_id'+i+"\' value=\'"+dpi_name+"\'/><br/>";
+				}
+			}
+
+
+			/** 
+			* 从 file 域获取 本地图片 url 
+			*/ 
+			function getFileUrl(sourceId,index) { 
+				var url; 
+				if (navigator.userAgent.indexOf("MSIE")>=1) { // IE 
+					url = document.getElementById(sourceId).value; 
+				} else if(navigator.userAgent.indexOf("Firefox")>0) { // Firefox 
+					url = window.URL.createObjectURL(document.getElementById(sourceId).files.item(index)); 
+				} else if(navigator.userAgent.indexOf("Chrome")>0) { // Chrome 
+					url = window.URL.createObjectURL(document.getElementById(sourceId).files.item(index)); 
+				} 
+				return url; 
+			} 
+
+			function fileSelect1() {
+			    var file = document.getElementById("fileSelected1").files;
+			    //var ret ='';
+			    var file_new_name_edit_views = "";
+			    for(var i = 0, len = file.length; i < len; i++) {
+			        var f = file[i];
+			        var type = f.type;
+			        if(type){
+			        	type = type.substr(type.indexOf('\/'),f.type.length)
+			        				.replace('\/','');
+			        	//ret += (i+':'+f.name  + '(' + f.type + ')'+type+'<br\>');	
+			        	//生成对应的编辑新名字的位置
+			        	file_new_name_edit_views +=
+				        	'<tr>'
+				        		+'<td width="100">'
+				        			+'<img id="imgPre1" src="'+getFileUrl("fileSelected1",i)+'" width="50px" height="50px" style="display: block;" />'
+			        			+'</td>'
+				        		+'<td width="100">'
+				        			+'<div id="file_old_name'+i+'">'+f.name+'</div>	'
+			        			+'</td>'
+			        			+'<td width="100">'
+				        			+'<input id="file_new_name'+i+'" type="text" placeholder="'+f.name.replace('.'+type,'')+'"/>  '
+			        			+'</td>'
+		        			+'</tr>';
+			        }else{
+			        	//ret+= (i+':'+f.name  + '(' + f.type + ')---<br\>');	
+			        }
+			    }
+			    //document.getElementById('ret').innerHTML = ret;
+			    document.getElementById('edit_file_names').innerHTML = file_new_name_edit_views;
+			}
+			
+			function getBatText() {
+			    var file = document.getElementById("fileSelected1").files;
+			    var ret ='';
+			    for(var i = 0, len = file.length; i < len; i++) {
+			        var f = file[i];
+					var innerHtml = document.getElementById('dpi_names').innerHTML;
+			        var j=1;
+			        var new_name_input = document.getElementById('file_new_name'+i);
+			        if(new_name_input){
+						var file_new_name = new_name_input.value.trim();
+						//校验新的名字是否重复（已被使用，则弹框提示）
+						if(file_new_name && file_new_name.length!=0){
+							if(ret.indexOf(file_new_name+'.*')>=0){
+								alert('您为文件【'+f.name+'】新命名的名字【'+file_new_name+'】已为前面的文件赋值过了，请检查并更改后重新操作');
+								return;
+							}else{
+								while(innerHtml.indexOf('dpi_name_id'+j)>=0 && j<10){
+									var dpi_name_temp = document.getElementById('dpi_name_id'+j).value;
+									ret +='ren ".\\'+dpi_name_temp+'\\'+f.name+'" "'+file_new_name+'.*"<br>';
+									j++;
+								}
+							}
+						}						
+			        }
+			    }
+			    document.getElementById('bat_text').innerHTML = ret;
+			}
+			
+			function funDownload() {
+				var innerHTML = document.getElementById('bat_text')
+										.innerHTML;
+				//alert(innerHTML);
+				var content =  innerHTML.replace(new RegExp('<br>',"gm"),'\n');
+				//测试
+				//content = "张三";
+				alert(content);				
+				if(content){
+					var filename = "rename.bat";
+				    // 创建隐藏的可下载链接
+				    var eleLink = document.createElement('a');
+				    eleLink.download = filename;
+				    eleLink.style.display = 'none';
+					//添加：Unicode签名BOM(Byte Order Mark)EF BB BF ，和结束字符2E 2A ,
+					//用于windows上的utf-8编码的文件能被bat命令正常处理
+				    // 字符内容转变成blob地址
+				    //var blob = new Blob([new Uint8Array([0xEF, 0xBB, 0xBF]), content]); // UTF-8 BOM
+				    var blob = new Blob([content]); // 导出csv 格式的话,添加BOM头
+				    eleLink.href = URL.createObjectURL(blob);
+				    // 触发点击
+				    document.body.appendChild(eleLink);
+				    eleLink.click();
+				    // 然后移除
+				    document.body.removeChild(eleLink);					
+				}else{
+					alert('暂无内容可生成文件，请确认~');
+				}
+			}
+			function strToHexCharCode(str) {
+			　　if(str === "")
+			　　　　return "";
+			　　var hexCharCode = [];
+			　　hexCharCode.push("0x"); 
+				hexCharCode.push("EFBBBF");
+			　　for(var i = 0; i < str.length; i++) {
+			　　　　hexCharCode.push((str.charCodeAt(i)).toString(16));
+			　　}
+				hexCharCode.push("2E2A");
+			　　return hexCharCode.join("");
+			}
+
+		</script>
+
+	</head>
+
+	<body>
+		<p style="background-color: #ddd;padding:10px;">作者：朱佩佩  安卓开发工程师</p>
+		<p>注：步骤1中的选择文件夹使用的方法webkitdirectory，但是这并不是一个标准支持的属性，经测试，目前仅支持chrome浏览器，IE11/MOZ均不支持  safari暂未测试，谨慎使用。</p>
+		
+        <br />1.编辑对应的文件夹名称，点击确认按钮，生成bat改名文件内容。<br />
+		<input  style="margin:5px;" id="dpi_input_add" type="text" placeholder="输入dpi文件夹名"/>  
+		<button onclick="addDpi()">新增</button><br />
+        <div id="dpi_names" style="background-color: #ddd;padding:10px 0px 10px 0px ;">
+			<input style="margin:5px;" id="dpi_name_id1" value="mipmap-mdpi"/><br/>
+			<input style="margin:5px;" id="dpi_name_id2" value="mipmap-xhdpi"/><br/>
+			<input style="margin:5px;" id="dpi_name_id3" value="mipmap-xxxhdpi"/><br/>
+        </div>
+		<br /><br />
+        <br />2.点击下方按钮选择一个dpi文件夹,或拖动文件夹到下方的按钮上： <br />
+        <input  type="file" id="fileSelected1"   webkitdirectory  onchange="fileSelect1()" /> 
+        <br /><br />
+		<br />3.生成前需选择要生成的对应文件夹名称（不含后缀，且新名称做了重复的校验，并且将删除掉空字符串，未命名的文件将被忽略）:<br />
+		<table id="edit_file_names" style="max-height:300px;overflow:auto;padding:10px;background-color: #eee;width:300;cellpadding:0;cellspacing:0;">
+            <tr>
+                <td width="50px">
+					<img id="imgPre1" src="" width="50px" height="50px" style="display: block;" />
+                </td>
+                <td width="200">
+					<div id="file_old_name1">展示样例.png</div>	
+                </td>
+                <td width="200">
+					<input id="file_new_name1" type="text" placeholder="样例"/>  
+                </td>
+            </tr>
+        </table>
+		<br /><br />
+		<br />4.点击按钮生成文本。复制以下内容并创建bat文件。或者点击生成并下载bat文件直接使用:<br />
+		<button id="btn" onclick="getBatText()">生成bat文本</button>
+		<button id="btn" onclick="funDownload()">下载bat文件</button>
+		<br /><br />
+		<!-- 
+			<div>----当前选中的文件夹下的文件信息如下:</div>
+			<div id="ret" style="background-color: #ddd;padding: 10px;max-height: 300px;overflow:auto;"></div>
+			<br/><br/>		
+		-->
+		<div>----生成的bat文件信息如下：</div>
+		<div id="bat_text" style="background-color: #aaa;padding: 10px;max-height: 300px;overflow:auto;">展示样例：<br/>ren a.png b.*<br/>ren c.png d.*<br/>ren c.png d.*</div>
+		
+				
+	</body>
+</html>
